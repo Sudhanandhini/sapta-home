@@ -28,16 +28,16 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link, index) => (<motion.div key={link.name} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.1 }}>
-                <Link to={link.href} className="relative text-foreground/80 hover:text-primary font-medium transition-colors duration-300 group">
+                <Link to={link.href} className="relative text-foreground/80 hover:text-secondary font-medium transition-colors duration-300 group">
                   {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full"/>
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-secondary transition-all duration-300 group-hover:w-full"/>
                 </Link>
               </motion.div>))}
           </nav>
 
           {/* Desktop Actions */}
           <motion.div className="hidden lg:flex items-center gap-4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-            <button className="p-2 text-foreground/70 hover:text-primary transition-colors duration-300">
+            {/* <button className="p-2 text-foreground/70 hover:text-primary transition-colors duration-300">
               <Search className="w-5 h-5"/>
             </button>
             <button className="p-2 text-foreground/70 hover:text-primary transition-colors duration-300 relative">
@@ -45,8 +45,8 @@ const Header = () => {
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent rounded-full text-[10px] font-bold flex items-center justify-center text-accent-foreground">
                 0
               </span>
-            </button>
-            <Link to="/contact" className="ml-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:bg-navy-light transition-all duration-300 shadow-soft hover:shadow-hover">
+            </button> */}
+            <Link to="/contact" className="ml-2 px-5 py-2.5 bg-gradient-to-r from-secondary to-secondary/90 text-secondary-foreground rounded-full font-medium text-sm hover:from-secondary/90 hover:to-secondary transition-all duration-300 shadow-soft hover:shadow-hover">
               Get Quote
             </Link>
           </motion.div>
@@ -62,10 +62,10 @@ const Header = () => {
       <AnimatePresence>
         {isMenuOpen && (<motion.div className="lg:hidden absolute top-full left-0 right-0 bg-background border-b border-border" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3 }}>
             <nav className="container mx-auto px-4 py-6 flex flex-col gap-4">
-              {navLinks.map((link) => (<Link key={link.name} to={link.href} className="text-foreground/80 hover:text-primary font-medium py-2 transition-colors duration-300" onClick={() => setIsMenuOpen(false)}>
+              {navLinks.map((link) => (<Link key={link.name} to={link.href} className="text-foreground/80 hover:text-secondary font-medium py-2 transition-colors duration-300" onClick={() => setIsMenuOpen(false)}>
                   {link.name}
                 </Link>))}
-              <Link to="/contact" className="mt-4 px-5 py-3 bg-primary text-primary-foreground rounded-full font-medium text-center hover:bg-navy-light transition-all duration-300" onClick={() => setIsMenuOpen(false)}>
+              <Link to="/contact" className="mt-4 px-5 py-3 bg-gradient-to-r from-secondary to-secondary/90 text-secondary-foreground rounded-full font-medium text-center hover:from-secondary/90 hover:to-secondary transition-all duration-300" onClick={() => setIsMenuOpen(false)}>
                 Get Quote
               </Link>
             </nav>

@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Mail, Phone, MapPin, Clock, Send, MessageSquare, ArrowRight } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Send, ArrowRight, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 const fadeUp = {
@@ -27,24 +27,28 @@ const contactInfo = [
     title: "Visit Us",
     lines: ["Karumpudur, Kandili M.", "Karur, Tamil Nadu, India - 639 002"],
     href: null,
+    color: "secondary",
   },
   {
     icon: Phone,
     title: "Call Us",
     lines: ["+91 81500 11550"],
     href: "tel:+918150011550",
+    color: "accent",
   },
   {
     icon: Mail,
     title: "Email Us",
     lines: ["contact@sapta.com"],
     href: "mailto:contact@sapta.com",
+    color: "secondary",
   },
   {
     icon: Clock,
     title: "Working Hours",
     lines: ["Mon - Sat: 09:00 am - 6:00 pm", "Sunday: 10:30 am - 4:00 pm"],
     href: null,
+    color: "accent",
   },
 ];
 
@@ -59,14 +63,19 @@ const Contact = () => {
           <div className="absolute inset-0 bg-primary/75" />
           {/* Floating decorative elements */}
           <motion.div
-            className="absolute top-20 right-20 w-32 h-32 rounded-full bg-accent/10 blur-2xl"
+            className="absolute top-20 right-20 w-32 h-32 rounded-full bg-secondary/10 blur-2xl"
             animate={{ y: [-10, 10, -10], scale: [1, 1.1, 1] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
-            className="absolute bottom-10 left-10 w-24 h-24 rounded-full bg-secondary/10 blur-2xl"
+            className="absolute bottom-10 left-10 w-24 h-24 rounded-full bg-accent/10 blur-2xl"
             animate={{ y: [10, -10, 10], scale: [1.1, 1, 1.1] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-1/2 left-1/3 w-20 h-20 rounded-full bg-accent/8 blur-2xl"
+            animate={{ x: [-15, 15, -15], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
           />
           <div className="container mx-auto px-4 lg:px-8 relative z-10 py-20 lg:py-28">
             <motion.div
@@ -77,9 +86,9 @@ const Contact = () => {
               <motion.span
                 variants={fadeUp}
                 custom={0}
-                className="inline-flex items-center gap-2 rounded-full bg-accent/20 backdrop-blur-sm px-4 py-1.5 text-sm font-semibold text-primary-foreground border border-accent/30"
+                className="inline-flex items-center gap-2 rounded-full bg-secondary/20 backdrop-blur-sm px-4 py-1.5 text-sm font-semibold text-primary-foreground border border-secondary/30"
               >
-                <MessageSquare className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-accent" />
                 Get In Touch
               </motion.span>
               <motion.h1
@@ -88,7 +97,7 @@ const Contact = () => {
                 className="mt-6 font-display text-4xl font-bold text-primary-foreground sm:text-5xl lg:text-6xl leading-tight"
               >
                 Let's Get You <br />
-                <span className="text-accent">Cozy & Connected</span>
+                <span className="text-secondary">Cozy</span> & <span className="text-accent">Connected</span>
               </motion.h1>
               <motion.p
                 variants={fadeUp}
@@ -111,40 +120,49 @@ const Contact = () => {
         {/* Contact Cards */}
         <section className="container mx-auto px-4 lg:px-8 -mt-10 relative z-20">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {contactInfo.map((item, index) => (
-              <motion.div
-                key={item.title}
-                variants={scaleIn}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                custom={index}
-                whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                className="rounded-2xl border border-border bg-card p-6 shadow-card group cursor-default"
-              >
-                <motion.span
-                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300"
+            {contactInfo.map((item, index) => {
+              const isPink = item.color === "secondary";
+              return (
+                <motion.div
+                  key={item.title}
+                  variants={scaleIn}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  custom={index}
+                  whileHover={{ y: -6, transition: { duration: 0.25 } }}
+                  className="rounded-2xl border border-border bg-card p-6 shadow-card group cursor-default"
                 >
-                  <item.icon className="h-5 w-5" />
-                </motion.span>
-                <h3 className="mt-4 text-base font-semibold text-primary">{item.title}</h3>
-                {item.lines.map((line, i) =>
-                  item.href && i === 0 ? (
-                    <a
-                      key={i}
-                      href={item.href}
-                      className="mt-1 block text-sm text-foreground/70 hover:text-primary transition-colors"
-                    >
-                      {line}
-                    </a>
-                  ) : (
-                    <p key={i} className={`${i === 0 ? "mt-2" : "mt-0.5"} text-sm text-foreground/70`}>
-                      {line}
-                    </p>
-                  )
-                )}
-              </motion.div>
-            ))}
+                  <motion.span
+                    className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors duration-300 ${
+                      isPink
+                        ? "bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-secondary-foreground"
+                        : "bg-accent/15 text-accent group-hover:bg-accent group-hover:text-accent-foreground"
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5" />
+                  </motion.span>
+                  <h3 className={`mt-4 text-base font-semibold ${isPink ? "text-secondary" : "text-accent"}`}>
+                    {item.title}
+                  </h3>
+                  {item.lines.map((line, i) =>
+                    item.href && i === 0 ? (
+                      <a
+                        key={i}
+                        href={item.href}
+                        className="mt-1 block text-sm text-foreground/70 hover:text-primary transition-colors"
+                      >
+                        {line}
+                      </a>
+                    ) : (
+                      <p key={i} className={`${i === 0 ? "mt-2" : "mt-0.5"} text-sm text-foreground/70`}>
+                        {line}
+                      </p>
+                    )
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </section>
 
@@ -167,56 +185,56 @@ const Contact = () => {
               <form className="mt-8 space-y-5">
                 <motion.div variants={fadeUp} custom={1} className="grid gap-5 sm:grid-cols-2">
                   <div className="group">
-                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-primary transition-colors">
+                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-secondary transition-colors">
                       Your Name
                     </label>
                     <input
                       type="text"
                       placeholder="John Doe"
-                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                     />
                   </div>
                   <div className="group">
-                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-primary transition-colors">
+                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-accent transition-colors">
                       Email Address
                     </label>
                     <input
                       type="email"
                       placeholder="john@example.com"
-                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
                     />
                   </div>
                 </motion.div>
                 <motion.div variants={fadeUp} custom={2} className="grid gap-5 sm:grid-cols-2">
                   <div className="group">
-                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-primary transition-colors">
+                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-accent transition-colors">
                       Phone Number
                     </label>
                     <input
                       type="text"
                       placeholder="+91 00000 00000"
-                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
                     />
                   </div>
                   <div className="group">
-                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-primary transition-colors">
+                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-secondary transition-colors">
                       Subject
                     </label>
                     <input
                       type="text"
                       placeholder="Bulk Order Inquiry"
-                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                     />
                   </div>
                 </motion.div>
                 <motion.div variants={fadeUp} custom={3} className="group">
-                  <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-primary transition-colors">
+                  <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-secondary transition-colors">
                     Your Message
                   </label>
                   <textarea
                     rows={5}
                     placeholder="Tell us about your needs..."
-                    className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
                   />
                 </motion.div>
                 <motion.div variants={fadeUp} custom={4}>
@@ -224,7 +242,7 @@ const Contact = () => {
                     type="button"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-soft hover:shadow-hover hover:bg-navy-light transition-all duration-300 flex items-center justify-center gap-2 group"
+                    className="w-full rounded-full bg-gradient-to-r from-secondary to-secondary/90 px-6 py-3.5 text-sm font-semibold text-secondary-foreground shadow-soft hover:shadow-hover hover:from-secondary/90 hover:to-secondary transition-all duration-300 flex items-center justify-center gap-2 group"
                   >
                     <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     Submit Enquiry
@@ -266,9 +284,9 @@ const Contact = () => {
                 custom={2}
                 className="rounded-3xl bg-primary p-8 text-primary-foreground relative overflow-hidden"
               >
-                {/* Decorative circle */}
-                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-accent/10" />
-                <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-secondary/10" />
+                {/* Decorative circles - pink & yellow */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-secondary/15" />
+                <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-accent/12" />
                 <div className="relative z-10">
                   <h3 className="font-display text-xl font-bold">Need Quick Help?</h3>
                   <p className="mt-2 text-sm text-primary-foreground/70">

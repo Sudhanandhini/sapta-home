@@ -60,7 +60,7 @@ const Footer = () => {
               Karumpudur,kandili M. Karur, Tamil Nadu, India - 639 002
             </p>
             <div className="flex gap-3">
-              {socialLinks.map((social, index) => (<motion.a key={index} href={social.href} aria-label={social.label} className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/70 hover:bg-accent hover:text-accent-foreground transition-all" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+              {socialLinks.map((social, index) => (<motion.a key={index} href={social.href} aria-label={social.label} className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/70 hover:bg-secondary hover:text-secondary-foreground transition-all" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                   <social.icon className="w-4 h-4"/>
                 </motion.a>))}
             </div>
@@ -68,10 +68,10 @@ const Footer = () => {
 
           {/* Quick Links */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-            <h4 className="font-semibold text-lg mb-6">Quick Links</h4>
+            <h4 className="font-semibold text-lg mb-6 text-secondary">Quick Links</h4>
             <ul className="space-y-3">
               {quickLinks.map((link, index) => (<li key={index}>
-                  <a href={link.href} className="text-primary-foreground/70 hover:text-accent transition-colors">
+                  <a href={link.href} className="text-primary-foreground/70 hover:text-secondary transition-colors">
                     {link.name}
                   </a>
                 </li>))}
@@ -80,10 +80,10 @@ const Footer = () => {
 
           {/* Categories */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
-            <h4 className="font-semibold text-lg mb-6">Categories</h4>
+            <h4 className="font-semibold text-lg mb-6 text-accent">Categories</h4>
             <ul className="space-y-3">
               {categories.map((category, index) => (<li key={index}>
-                  <a href={category.href} className="text-primary-foreground/70 hover:text-accent transition-colors">
+                  <a href={category.href} className="text-primary-foreground/70 hover:text-secondary transition-colors">
                     {category.name}
                   </a>
                 </li>))}
@@ -92,7 +92,7 @@ const Footer = () => {
 
           {/* Contact */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>
-            <h4 className="font-semibold text-lg mb-6">Need Help?</h4>
+            <h4 className="font-semibold text-lg mb-6 text-secondary">Need Help?</h4>
             <ul className="space-y-4">
               <li>
                 <a href="tel:+918150011550" className="flex items-center gap-3 text-accent font-semibold hover:brightness-110 transition-all">
@@ -101,7 +101,7 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="mailto:contact@sapta.com" className="flex items-center gap-3 text-primary-foreground/70 hover:text-accent transition-colors">
+                <a href="mailto:contact@sapta.com" className="flex items-center gap-3 text-primary-foreground/70 hover:text-secondary transition-colors">
                   <Mail className="w-5 h-5"/>
                   contact@sapta.com
                 </a>

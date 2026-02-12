@@ -91,14 +91,14 @@ const Products = () => {
           <div className="grid gap-10 lg:grid-cols-[280px_1fr]">
             <aside className="space-y-8">
               <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-                <h3 className="text-lg font-semibold text-primary">Categories</h3>
+                <h3 className="text-lg font-semibold text-secondary">Categories</h3>
                 <ul className="mt-4 space-y-3 text-sm">
                   <li>
                     <button
                       type="button"
                       onClick={() => setSelectedCategory("")}
                       className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition ${
-                        selectedCategory === "" ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                        selectedCategory === "" ? "bg-secondary/10 text-secondary font-medium" : "hover:bg-muted"
                       }`}
                     >
                       <span>All</span>
@@ -111,7 +111,7 @@ const Products = () => {
                         type="button"
                         onClick={() => setSelectedCategory(cat.category)}
                         className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition ${
-                          selectedCategory === cat.category ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                          selectedCategory === cat.category ? "bg-secondary/10 text-secondary font-medium" : "hover:bg-muted"
                         }`}
                       >
                         <span>{cat.category}</span>
@@ -123,7 +123,7 @@ const Products = () => {
               </div>
 
               <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-                <h3 className="text-lg font-semibold text-primary">Featured Products</h3>
+                <h3 className="text-lg font-semibold text-secondary">Featured Products</h3>
                 <div className="mt-4 space-y-4">
                   {featuredProducts.length === 0 && (
                     <p className="text-sm text-foreground/60">No featured items yet.</p>
@@ -195,19 +195,19 @@ const Products = () => {
                           alt={item.name}
                           className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-                        {item.is_featured && (
+                        {/* {item.is_featured && (
                           <span className="absolute left-3 top-3 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
                             Featured
                           </span>
-                        )}
+                        )} */}
                       </div>
                       <div className="mt-4">
                         <p className="text-xs uppercase tracking-widest text-foreground/60">{item.category}</p>
                         <h3 className="mt-1 text-lg font-semibold text-foreground">{item.name}</h3>
                         <p className="mt-2 text-sm text-foreground/70 line-clamp-2">{item.description}</p>
                         <div className="mt-4 flex items-center justify-between">
-                          <span className="text-sm font-semibold text-primary">View Details</span>
-                          <span className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground">
+                          <span className="text-sm font-semibold text-secondary">View Details</span>
+                          <span className="rounded-full bg-secondary px-4 py-2 text-xs font-semibold text-secondary-foreground">
                             View
                           </span>
                         </div>
@@ -226,7 +226,7 @@ const Products = () => {
                       onClick={() => setPage(pageNumber)}
                       className={`h-8 w-8 rounded-full text-sm font-medium ${
                         page === pageNumber
-                          ? "bg-accent text-accent-foreground"
+                          ? "bg-secondary text-secondary-foreground"
                           : "border border-border text-foreground/70 hover:bg-muted"
                       }`}
                       type="button"

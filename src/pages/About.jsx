@@ -6,7 +6,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import {
   Sparkles, Tag, ShieldCheck, Shapes, HeartHandshake,
   Target, Eye, Award, Users, MapPin, Package, ArrowRight,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Star,
 } from "lucide-react";
 import heroBedroom from "@/assets/hero-bedroom.jpg";
 
@@ -26,7 +26,6 @@ const useCounter = (end, duration = 2000, startOnView = false) => {
     const tick = (now) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // easeOutExpo
       const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
       setCount(Math.round(eased * end));
       if (progress < 1) requestAnimationFrame(tick);
@@ -37,8 +36,9 @@ const useCounter = (end, duration = 2000, startOnView = false) => {
   return { count, ref };
 };
 
-const CounterStat = ({ numericValue, suffix, label, icon: Icon, index }) => {
+const CounterStat = ({ numericValue, suffix, label, icon: Icon, index, color = "secondary" }) => {
   const { count, ref } = useCounter(numericValue, 2000, true);
+  const isAccent = color === "accent";
   return (
     <motion.div
       ref={ref}
@@ -50,10 +50,10 @@ const CounterStat = ({ numericValue, suffix, label, icon: Icon, index }) => {
       whileHover={{ y: -4, transition: { duration: 0.25 } }}
       className="rounded-2xl border border-border bg-card p-5 shadow-card text-center group"
     >
-      <motion.span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+      <motion.span className={`mx-auto flex h-11 w-11 items-center justify-center rounded-xl ${isAccent ? "bg-accent/15 text-accent group-hover:bg-accent group-hover:text-accent-foreground" : "bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-secondary-foreground"} transition-colors duration-300`}>
         <Icon className="h-5 w-5" />
       </motion.span>
-      <p className="mt-3 text-2xl font-bold text-primary tabular-nums">
+      <p className={`mt-3 text-2xl font-bold ${isAccent ? "text-accent" : "text-secondary"} tabular-nums`}>
         {count}{suffix}
       </p>
       <p className="mt-1 text-xs text-foreground/60">{label}</p>
@@ -84,45 +84,57 @@ const highlights = [
     title: "Best-in-Class Quality",
     description: "Every product is made with carefully chosen materials and strict quality checks.",
     icon: ShieldCheck,
-    hoverBg: "hover:bg-primary",
+    hoverBg: "hover:bg-secondary",
+    iconColor: "text-secondary",
+    iconBg: "bg-secondary/10",
   },
   {
     title: "Fair Pricing",
     description: "Premium designs and comfort, offered at honest, affordable prices.",
     icon: Tag,
-    hoverBg: "hover:bg-navy-light",
+    hoverBg: "hover:bg-accent",
+    iconColor: "text-accent",
+    iconBg: "bg-accent/15",
   },
   {
     title: "Timeless Style",
     description: "Designs that look good today, tomorrow, and for years to come.",
     icon: Sparkles,
-    hoverBg: "hover:bg-accent",
+    hoverBg: "hover:bg-secondary",
+    iconColor: "text-secondary",
+    iconBg: "bg-secondary/10",
   },
   {
     title: "Everyday Practicality",
     description: "Products crafted for real-life use, combining beauty with function.",
     icon: Shapes,
-    hoverBg: "hover:bg-primary",
+    hoverBg: "hover:bg-accent",
+    iconColor: "text-accent",
+    iconBg: "bg-accent/15",
   },
   {
     title: "Customer-Centric Approach",
     description: "We listen, we care, and we create with your comfort in mind.",
     icon: HeartHandshake,
-    hoverBg: "hover:bg-navy-light",
+    hoverBg: "hover:bg-secondary",
+    iconColor: "text-secondary",
+    iconBg: "bg-secondary/10",
   },
   {
     title: "Trusted Nationwide",
     description: "Serving happy customers across India with reliable delivery and support.",
     icon: Award,
     hoverBg: "hover:bg-accent",
+    iconColor: "text-accent",
+    iconBg: "bg-accent/15",
   },
 ];
 
 const stats = [
-  { numericValue: 2000, suffix: "+", label: "Happy Customers", icon: Users },
-  { numericValue: 150, suffix: "+", label: "Products", icon: Package },
-  { numericValue: 10, suffix: "+", label: "Years Experience", icon: Award },
-  { numericValue: 0, suffix: "", label: "Pan India Delivery", icon: MapPin, isText: true, textValue: "Pan India" },
+  { numericValue: 2000, suffix: "+", label: "Happy Customers", icon: Users, color: "secondary" },
+  { numericValue: 150, suffix: "+", label: "Products", icon: Package, color: "accent" },
+  { numericValue: 10, suffix: "+", label: "Years Experience", icon: Award, color: "secondary" },
+  { numericValue: 0, suffix: "", label: "Pan India Delivery", icon: MapPin, isText: true, textValue: "Pan India", color: "accent" },
 ];
 
 /* ── Highlights Carousel ── */
@@ -178,8 +190,9 @@ const HighlightsSlider = () => {
           <motion.span
             variants={fadeUp}
             custom={0}
-            className="inline-block px-4 py-1.5 bg-accent/20 text-foreground rounded-full text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/15 text-accent-foreground rounded-full text-sm font-medium border border-accent/30"
           >
+            <Star className="w-3.5 h-3.5 fill-accent text-accent" />
             Why Choose Sapta
           </motion.span>
           <motion.h2
@@ -187,7 +200,7 @@ const HighlightsSlider = () => {
             custom={1}
             className="mt-4 font-display text-3xl lg:text-5xl font-bold text-primary"
           >
-            What Makes Us Different
+            What Makes Us <span className="text-secondary">Different</span>
           </motion.h2>
           <motion.p
             variants={fadeUp}
@@ -214,7 +227,7 @@ const HighlightsSlider = () => {
                   className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_25%] pl-5"
                 >
                   <div className={`group relative h-full rounded-2xl bg-card shadow-soft hover:shadow-hover ${item.hoverBg} transition-all duration-400 p-6 cursor-default`}>
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-white/20 group-hover:text-white transition-colors duration-300 mb-4">
+                    <div className={`w-12 h-12 rounded-xl ${item.iconBg} flex items-center justify-center ${item.iconColor} group-hover:bg-white/20 group-hover:text-white transition-colors duration-300 mb-4`}>
                       <item.icon className="w-6 h-6" />
                     </div>
                     <h3 className="font-display text-lg font-semibold text-foreground group-hover:text-white transition-colors duration-300">
@@ -234,7 +247,7 @@ const HighlightsSlider = () => {
             type="button"
             onClick={() => emblaApi?.scrollPrev()}
             disabled={!canPrev}
-            className="absolute -left-3 lg:-left-5 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-card border border-border shadow-card text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-30 transition-all duration-300"
+            className="absolute -left-3 lg:-left-5 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-card border border-border shadow-card text-secondary hover:bg-secondary hover:text-secondary-foreground disabled:opacity-30 transition-all duration-300"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -242,7 +255,7 @@ const HighlightsSlider = () => {
             type="button"
             onClick={() => emblaApi?.scrollNext()}
             disabled={!canNext}
-            className="absolute -right-3 lg:-right-5 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-card border border-border shadow-card text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-30 transition-all duration-300"
+            className="absolute -right-3 lg:-right-5 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-card border border-border shadow-card text-accent hover:bg-accent hover:text-accent-foreground disabled:opacity-30 transition-all duration-300"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -257,8 +270,8 @@ const HighlightsSlider = () => {
               onClick={() => emblaApi?.scrollTo(index)}
               className={`h-2.5 rounded-full transition-all duration-300 ${
                 selectedIndex === index
-                  ? "w-8 bg-primary"
-                  : "w-2.5 bg-primary/20 hover:bg-primary/40"
+                  ? "w-8 bg-secondary"
+                  : "w-2.5 bg-secondary/20 hover:bg-secondary/40"
               }`}
             />
           ))}
@@ -292,9 +305,9 @@ const About = () => {
               <motion.span
                 variants={fadeUp}
                 custom={0}
-                className="inline-flex items-center gap-2 rounded-full bg-accent/20 backdrop-blur-sm px-4 py-1.5 text-sm font-semibold text-primary-foreground border border-accent/30"
+                className="inline-flex items-center gap-2 rounded-full bg-secondary/20 backdrop-blur-sm px-4 py-1.5 text-sm font-semibold text-primary-foreground border border-secondary/30"
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-accent" />
                 About Us
               </motion.span>
               <motion.h1
@@ -303,7 +316,7 @@ const About = () => {
                 className="mt-6 font-display text-4xl font-bold text-primary-foreground sm:text-5xl lg:text-6xl leading-tight"
               >
                 A Brand Built on <br />
-                <span className="text-accent">Comfort & Trust</span>
+                <span className="text-secondary">Comfort</span> & <span className="text-accent">Trust</span>
               </motion.h1>
               <motion.p
                 variants={fadeUp}
@@ -338,10 +351,10 @@ const About = () => {
                   whileHover={{ y: -4, transition: { duration: 0.25 } }}
                   className="rounded-2xl border border-border bg-card p-5 shadow-card text-center group"
                 >
-                  <motion.span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                  <motion.span className={`mx-auto flex h-11 w-11 items-center justify-center rounded-xl ${stat.color === "accent" ? "bg-accent/15 text-accent group-hover:bg-accent group-hover:text-accent-foreground" : "bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-secondary-foreground"} transition-colors duration-300`}>
                     <stat.icon className="h-5 w-5" />
                   </motion.span>
-                  <p className="mt-3 text-2xl font-bold text-primary">{stat.textValue}</p>
+                  <p className={`mt-3 text-2xl font-bold ${stat.color === "accent" ? "text-accent" : "text-secondary"}`}>{stat.textValue}</p>
                   <p className="mt-1 text-xs text-foreground/60">{stat.label}</p>
                 </motion.div>
               ) : (
@@ -352,6 +365,7 @@ const About = () => {
                   label={stat.label}
                   icon={stat.icon}
                   index={index}
+                  color={stat.color}
                 />
               )
             )}
@@ -369,8 +383,9 @@ const About = () => {
               <motion.span
                 variants={fadeUp}
                 custom={0}
-                className="inline-block px-4 py-1.5 bg-accent/20 text-foreground rounded-full text-sm font-medium"
+                className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/15 text-accent-foreground rounded-full text-sm font-medium border border-accent/30"
               >
+                <Star className="w-3.5 h-3.5 fill-accent text-accent" />
                 Our Story
               </motion.span>
               <motion.h2
@@ -401,7 +416,7 @@ const About = () => {
                 variants={fadeUp}
                 custom={4}
                 href="/products"
-                className="mt-6 inline-flex items-center gap-2 text-primary font-semibold hover:text-navy-light transition-colors group"
+                className="mt-6 inline-flex items-center gap-2 text-accent font-semibold hover:text-accent/80 transition-colors group"
               >
                 Explore Our Products
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -416,7 +431,7 @@ const About = () => {
               className="relative"
             >
               <motion.div
-                className="rounded-3xl overflow-hidden shadow-hover"
+                className="rounded-3xl overflow-hidden shadow-hover border-2 border-accent/10"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
@@ -425,15 +440,16 @@ const About = () => {
                   alt="Sapta Home Textiles craftsmanship"
                   className="w-full h-auto object-cover aspect-[4/3]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent rounded-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-secondary/5 rounded-3xl" />
               </motion.div>
               {/* Floating badge */}
               <motion.div
-                className="absolute -bottom-5 -left-5 bg-card p-4 rounded-2xl shadow-card"
+                className="absolute -bottom-5 -left-5 bg-card p-4 rounded-2xl shadow-card border border-accent/20"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.6 }}
+                whileHover={{ scale: 1.05 }}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-full bg-accent/20 flex items-center justify-center">
@@ -444,6 +460,17 @@ const About = () => {
                     <p className="text-xs text-muted-foreground">of Excellence</p>
                   </div>
                 </div>
+              </motion.div>
+              {/* Pink badge top-right */}
+              <motion.div
+                className="absolute -top-3 -right-3 bg-secondary text-secondary-foreground px-4 py-2 rounded-full shadow-card text-xs font-bold"
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+                whileHover={{ scale: 1.1 }}
+              >
+                Trusted Brand
               </motion.div>
             </motion.div>
           </div>
@@ -461,8 +488,9 @@ const About = () => {
               <motion.span
                 variants={fadeUp}
                 custom={0}
-                className="inline-block px-4 py-1.5 bg-accent/20 text-foreground rounded-full text-sm font-medium"
+                className="inline-flex items-center gap-2 px-4 py-1.5 bg-secondary/15 text-secondary rounded-full text-sm font-medium border border-secondary/30"
               >
+                <Sparkles className="w-3.5 h-3.5" />
                 Our Purpose
               </motion.span>
               <motion.h2
@@ -475,6 +503,7 @@ const About = () => {
             </motion.div>
 
             <div className="grid lg:grid-cols-2 gap-8">
+              {/* Mission - Pink */}
               <motion.div
                 variants={scaleIn}
                 initial="hidden"
@@ -482,11 +511,11 @@ const About = () => {
                 viewport={{ once: true }}
                 custom={0}
                 whileHover={{ y: -4, transition: { duration: 0.25 } }}
-                className="bg-card rounded-3xl shadow-card p-8 lg:p-10 relative overflow-hidden group"
+                className="bg-card rounded-3xl shadow-card p-8 lg:p-10 relative overflow-hidden group border-l-4 border-secondary"
               >
-                <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-accent/5 group-hover:bg-accent/10 transition-colors duration-500" />
+                <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-secondary/5 group-hover:bg-secondary/10 transition-colors duration-500" />
                 <div className="relative z-10">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-secondary-foreground transition-colors duration-300">
                     <Target className="h-7 w-7" />
                   </span>
                   <h3 className="mt-5 font-display text-2xl font-bold text-primary">Our Mission</h3>
@@ -500,6 +529,7 @@ const About = () => {
                 </div>
               </motion.div>
 
+              {/* Vision - Yellow */}
               <motion.div
                 variants={scaleIn}
                 initial="hidden"
@@ -507,11 +537,11 @@ const About = () => {
                 viewport={{ once: true }}
                 custom={1}
                 whileHover={{ y: -4, transition: { duration: 0.25 } }}
-                className="bg-card rounded-3xl shadow-card p-8 lg:p-10 relative overflow-hidden group"
+                className="bg-card rounded-3xl shadow-card p-8 lg:p-10 relative overflow-hidden group border-l-4 border-accent"
               >
-                <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-secondary/5 group-hover:bg-secondary/10 transition-colors duration-500" />
+                <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-accent/5 group-hover:bg-accent/10 transition-colors duration-500" />
                 <div className="relative z-10">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors duration-300">
                     <Eye className="h-7 w-7" />
                   </span>
                   <h3 className="mt-5 font-display text-2xl font-bold text-primary">Our Vision</h3>
@@ -538,8 +568,8 @@ const About = () => {
             transition={{ duration: 0.6 }}
             className="rounded-3xl bg-primary p-10 lg:p-14 text-primary-foreground relative overflow-hidden text-center"
           >
-            <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-accent/10" />
-            <div className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-secondary/10" />
+            <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-secondary/15" />
+            <div className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-accent/10" />
             <div className="relative z-10 max-w-2xl mx-auto">
               <h2 className="font-display text-3xl lg:text-4xl font-bold">
                 Ready to Transform Your Home?
@@ -561,7 +591,7 @@ const About = () => {
                   href="/contact"
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-3.5 border-2 border-primary-foreground/30 text-primary-foreground rounded-full font-semibold hover:bg-primary-foreground/10 transition-all"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-secondary text-secondary-foreground rounded-full font-semibold shadow-soft hover:brightness-110 transition-all"
                 >
                   Contact Us
                 </motion.a>
