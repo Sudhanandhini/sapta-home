@@ -1,0 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 225 60% 98%;
+    --foreground: 229 56% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 229 56% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 229 56% 15%;
+
+    --primary: 229 56% 29%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 332 85% 53%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 229 25% 94%;
+    --muted-foreground: 229 20% 45%;
+
+    --accent: 51 98% 50%;
+    --accent-foreground: 229 56% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 229 20% 88%;
+    --input: 229 20% 88%;
+    --ring: 332 85% 53%;
+
+    --radius: 0.75rem;
+
+    /* Custom brand colors */
+    --navy: 229 56% 29%;
+    --navy-light: 229 45% 40%;
+    --gold: 51 98% 50%;
+    --gold-light: 51 95% 60%;
+    --cream: 225 60% 97%;
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(229 56% 29%) 0%, hsl(332 85% 53%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(51 98% 50%) 0%, hsl(51 95% 60%) 100%);
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -2px hsl(229 56% 20% / 0.12);
+    --shadow-card: 0 8px 30px -4px hsl(229 56% 20% / 0.16);
+    --shadow-hover: 0 12px 40px -6px hsl(229 56% 20% / 0.24);
+  }
+
+  .dark {
+    --background: 229 56% 8%;
+    --foreground: 225 60% 97%;
+
+    --card: 229 56% 12%;
+    --card-foreground: 225 60% 97%;
+
+    --popover: 229 56% 12%;
+    --popover-foreground: 225 60% 97%;
+
+    --primary: 51 98% 50%;
+    --primary-foreground: 229 56% 15%;
+
+    --secondary: 332 85% 53%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 229 30% 18%;
+    --muted-foreground: 229 20% 65%;
+
+    --accent: 332 85% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 229 30% 20%;
+    --input: 229 30% 20%;
+    --ring: 332 85% 53%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-navy-light transition-all duration-300 shadow-soft hover:shadow-hover;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-accent-foreground hover:brightness-110 transition-all duration-300 shadow-soft hover:shadow-hover;
+  }
+
+  .card-product {
+    @apply bg-card rounded-xl shadow-soft hover:shadow-hover transition-all duration-300 overflow-hidden;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-navy-light;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 6s ease-in-out infinite 2s;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background-size: 200% 100%;
+  }
+}
+
+@layer utilities {
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-hover {
+    box-shadow: var(--shadow-hover);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.h-15{
+  height: 6rem;
+}
+
+.app-loader {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  z-index: 9999;
+}
+
+.app-loader__inner {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  text-align: center;
+  color: hsl(var(--primary-foreground));
+}
+
+.app-loader__logo {
+  width: auto;
+  filter: drop-shadow(0 12px 24px hsl(229 56% 20% / 0.35));
+  animation: logo-float 2.8s ease-in-out infinite;
+}
+
+.app-loader__ring {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  border: 2px solid hsl(332 85% 53% / 0.35);
+  border-top-color: hsl(51 98% 50%);
+  border-right-color: hsl(332 85% 53%);
+  animation: loader-spin 1.2s linear infinite;
+}
+
+.app-loader__text {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: hsl(var(--background));
+  background: linear-gradient(90deg, hsl(51 98% 50%), hsl(332 85% 53%), hsl(51 98% 50%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.app-loader__progress {
+  width: min(220px, 70vw);
+  height: 8px;
+  border-radius: 999px;
+  background: hsl(229 20% 90%);
+  overflow: hidden;
+}
+
+.app-loader__progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, hsl(332 85% 53%), hsl(51 98% 50%));
+  transition: width 0.12s ease-out;
+}
+
+.app-loader__percent {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: hsl(229 56% 20%);
+}
+
+@keyframes loader-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes logo-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
