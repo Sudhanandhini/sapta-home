@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -82,8 +82,14 @@ const Products = () => {
 
     const itemsPerSlide = 4;
     const maxSlide = Math.ceil(products.length / itemsPerSlide) - 1;
-    const nextSlide = () => setCurrentSlide((prev) => Math.min(prev + 1, maxSlide));
-    const prevSlide = () => setCurrentSlide((prev) => Math.max(prev - 1, 0));
+    const nextSlide = useCallback(() => setCurrentSlide((prev) => (prev >= maxSlide ? 0 : prev + 1)), [maxSlide]);
+    const prevSlide = () => setCurrentSlide((prev) => (prev <= 0 ? maxSlide : prev - 1));
+
+    // Auto-slide every 4 seconds
+    useEffect(() => {
+      const timer = setInterval(nextSlide, 4000);
+      return () => clearInterval(timer);
+    }, [nextSlide]);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -129,7 +135,7 @@ const Products = () => {
             )}
 
             {/* Actions */}
-            <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {/* <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <motion.button
                 className="w-9 h-9 rounded-full bg-card shadow-md flex items-center justify-center text-muted-foreground hover:text-secondary hover:bg-secondary/10 transition-colors"
                 whileHover={{ scale: 1.1 }}
@@ -144,7 +150,7 @@ const Products = () => {
               >
                 <ShoppingCart className="w-4 h-4" />
               </motion.button>
-            </div>
+            </div> */}
 
             {/* Quick View */}
             <motion.div
@@ -152,9 +158,9 @@ const Products = () => {
               initial={{ y: 20 }}
               whileHover={{ y: 0 }}
             >
-              <button className="w-full py-2.5 bg-card/90 backdrop-blur-sm rounded-full text-sm font-medium text-foreground hover:bg-card transition-colors">
+              {/* <button className="w-full py-2.5 bg-card/90 backdrop-blur-sm rounded-full text-sm font-medium text-foreground hover:bg-card transition-colors">
                 Quick View
-              </button>
+              </button> */}
             </motion.div>
           </div>
 
@@ -184,7 +190,7 @@ const Products = () => {
               </span>
             </div>
 
-            <div className="text-sm font-semibold text-secondary">Request a quote</div>
+            {/* <div className="text-sm font-semibold text-secondary">Request a quote</div> */}
           </div>
         </div>
       </motion.div>
@@ -273,14 +279,14 @@ const Products = () => {
               </div>
             </motion.div>
 
-            <div className="overflow-hidden">
+            <div className="overflow-hidden -mx-3">
               <motion.div
-                className="flex gap-6"
+                className="flex"
                 animate={{ x: `-${currentSlide * 100}%` }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
               >
                 {products.map((product) => (
-                  <div key={product.id} className="w-full sm:w-1/2 lg:w-1/4 flex-shrink-0">
+                  <div key={product.id} className="w-full sm:w-1/2 lg:w-1/4 flex-shrink-0 px-3">
                     <ProductCard product={product} />
                   </div>
                 ))}

@@ -54,12 +54,12 @@ const Hero = () => {
                 Transform Your{" "}
                 <span className="relative">
                   <span className="relative z-10 text-secondary">Sleep</span>
-                  <motion.span
+                  {/* <motion.span
                     className="absolute bottom-2 left-0 right-0 h-3 bg-accent/30 -z-0"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={{ duration: 0.6, delay: 0.8 }}
-                  />
+                  /> */}
                 </span>
                 <br />
                 Experience
