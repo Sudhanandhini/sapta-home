@@ -22,7 +22,7 @@ const Footer = () => {
         { icon: Youtube, href: "#", label: "Youtube" },
         { icon: Linkedin, href: "#", label: "LinkedIn" },
     ];
-    return (<footer id="contact" className="bg-[#000] text-primary-foreground">
+    return (<footer id="contact" className="bg-[#213073] text-primary-foreground">
       {/* Newsletter */}
       {/* <div className="border-b border-primary-foreground/10">
         <div className="container mx-auto px-4 lg:px-8 py-12">

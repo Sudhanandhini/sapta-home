@@ -1,6 +1,7 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Mail, Phone, MapPin, Clock, Send, ArrowRight, Sparkles } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Send, ArrowRight, Sparkles, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 const fadeUp = {
@@ -53,6 +54,29 @@ const contactInfo = [
 ];
 
 const Contact = () => {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", place: "", message: "" });
+  const [status, setStatus] = useState("idle"); // idle | sending | sent | error
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus("sending");
+    try {
+      const res = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, subject: form.place }),
+      });
+      if (res.ok) {
+        setStatus("sent");
+        setForm({ name: "", email: "", phone: "", place: "", message: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -182,73 +206,120 @@ const Contact = () => {
                   Share your requirements and we'll get back to you quickly.
                 </p>
               </motion.div>
-              <form className="mt-8 space-y-5">
-                <motion.div variants={fadeUp} custom={1} className="grid gap-5 sm:grid-cols-2">
-                  <div className="group">
-                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-secondary transition-colors">
-                      Your Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="John Doe"
-                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
-                    />
+              {status === "sent" ? (
+                <motion.div
+                  className="mt-8 text-center py-10"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <div className="mx-auto h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                    <CheckCircle className="h-8 w-8 text-green-500" />
                   </div>
-                  <div className="group">
-                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-accent transition-colors">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="john@example.com"
-                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
-                    />
-                  </div>
-                </motion.div>
-                <motion.div variants={fadeUp} custom={2} className="grid gap-5 sm:grid-cols-2">
-                  <div className="group">
-                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-accent transition-colors">
-                      Phone Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="+91 00000 00000"
-                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
-                    />
-                  </div>
-                  <div className="group">
-                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-secondary transition-colors">
-                      Subject
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Bulk Order Inquiry"
-                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
-                    />
-                  </div>
-                </motion.div>
-                <motion.div variants={fadeUp} custom={3} className="group">
-                  <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-secondary transition-colors">
-                    Your Message
-                  </label>
-                  <textarea
-                    rows={5}
-                    placeholder="Tell us about your needs..."
-                    className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
-                  />
-                </motion.div>
-                <motion.div variants={fadeUp} custom={4}>
-                  <motion.button
+                  <h4 className="text-lg font-semibold text-foreground">Message Sent!</h4>
+                  <p className="mt-2 text-sm text-foreground/60">Thank you for reaching out. We'll get back to you shortly.</p>
+                  <button
                     type="button"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full rounded-full bg-gradient-to-r from-secondary to-secondary/90 px-6 py-3.5 text-sm font-semibold text-secondary-foreground shadow-soft hover:shadow-hover hover:from-secondary/90 hover:to-secondary transition-all duration-300 flex items-center justify-center gap-2 group"
+                    onClick={() => setStatus("idle")}
+                    className="mt-6 rounded-full bg-secondary px-6 py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
                   >
-                    <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                    Submit Enquiry
-                  </motion.button>
+                    Send Another Message
+                  </button>
                 </motion.div>
-              </form>
+              ) : (
+                <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+                  <motion.div variants={fadeUp} custom={1} className="grid gap-5 sm:grid-cols-2">
+                    <div className="group">
+                      <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-secondary transition-colors">
+                        Your Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={form.name}
+                        onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                        placeholder="John Doe"
+                        className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
+                      />
+                    </div>
+                    <div className="group">
+                      <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-accent transition-colors">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={form.email}
+                        onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                        placeholder="john@example.com"
+                        className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                      />
+                    </div>
+                  </motion.div>
+                  <motion.div variants={fadeUp} custom={2} className="grid gap-5 sm:grid-cols-2">
+                    <div className="group">
+                      <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-accent transition-colors">
+                        Phone Number
+                      </label>
+                      <input
+                        type="text"
+                        value={form.phone}
+                        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                        placeholder="+91 00000 00000"
+                        className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                      />
+                    </div>
+                    <div className="group">
+                      <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-secondary transition-colors">
+                        Place
+                      </label>
+                      <input
+                        type="text"
+                        value={form.place}
+                        onChange={(e) => setForm((f) => ({ ...f, place: e.target.value }))}
+                        placeholder="Your city / location"
+                        className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
+                      />
+                    </div>
+                  </motion.div>
+                  <motion.div variants={fadeUp} custom={3} className="group">
+                    <label className="block text-xs font-medium text-foreground/60 mb-1.5 group-focus-within:text-secondary transition-colors">
+                      Your Message *
+                    </label>
+                    <textarea
+                      rows={5}
+                      required
+                      value={form.message}
+                      onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                      placeholder="Tell us about your needs..."
+                      className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-all"
+                    />
+                  </motion.div>
+                  {status === "error" && (
+                    <p className="text-sm text-red-500">Failed to send. Please try again.</p>
+                  )}
+                  <motion.div variants={fadeUp} custom={4}>
+                    <motion.button
+                      type="submit"
+                      disabled={status === "sending"}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full rounded-full bg-gradient-to-r from-secondary to-secondary/90 px-6 py-3.5 text-sm font-semibold text-secondary-foreground shadow-soft hover:shadow-hover hover:from-secondary/90 hover:to-secondary transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-60"
+                    >
+                      {status === "sending" ? (
+                        <>
+                          <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                          Submit Enquiry
+                        </>
+                      )}
+                    </motion.button>
+                  </motion.div>
+                </form>
+              )}
             </motion.div>
 
             {/* Right Column — Map + Quick CTA */}

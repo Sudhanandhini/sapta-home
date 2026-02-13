@@ -8,6 +8,7 @@ import crypto from "crypto";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import nodemailer from "nodemailer";
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -312,6 +313,71 @@ app.delete("/api/products/:id", authMiddleware, requireAdmin, async (req, res) =
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to delete product" });
+  }
+});
+
+// ── Enquiry / Contact email endpoint ──
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER || "",
+    pass: process.env.SMTP_PASS || "",
+  },
+});
+
+app.post("/api/enquiry", async (req, res) => {
+  try {
+    const { name, email, phone, subject, message, productName, productSku } = req.body || {};
+    if (!name || !email || !message) {
+      return res.status(400).json({ message: "Name, email and message are required" });
+    }
+
+    const isProductEnquiry = !!productName;
+    const mailSubject = isProductEnquiry
+      ? `Product Enquiry: ${productName} (${productSku || "N/A"})`
+      : subject || "New Contact Enquiry";
+
+    const htmlBody = `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #eee;border-radius:12px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#ec4899,#eab308);padding:24px;color:#fff;">
+          <h2 style="margin:0;font-size:20px;">${isProductEnquiry ? "Product Enquiry" : "Contact Form Enquiry"}</h2>
+          <p style="margin:4px 0 0;opacity:0.9;font-size:14px;">From Sapta Home Furnishings Website</p>
+        </div>
+        <div style="padding:24px;">
+          ${isProductEnquiry ? `
+            <div style="background:#fdf2f8;border-left:4px solid #ec4899;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
+              <p style="margin:0;font-weight:600;color:#be185d;">Product: ${productName}</p>
+              <p style="margin:4px 0 0;font-size:13px;color:#9d174d;">SKU: ${productSku || "N/A"}</p>
+            </div>
+          ` : ""}
+          <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <tr><td style="padding:8px 0;color:#888;width:100px;">Name</td><td style="padding:8px 0;font-weight:600;">${name}</td></tr>
+            <tr><td style="padding:8px 0;color:#888;">Email</td><td style="padding:8px 0;">${email}</td></tr>
+            ${phone ? `<tr><td style="padding:8px 0;color:#888;">Phone</td><td style="padding:8px 0;">${phone}</td></tr>` : ""}
+            ${subject && !isProductEnquiry ? `<tr><td style="padding:8px 0;color:#888;">Subject</td><td style="padding:8px 0;">${subject}</td></tr>` : ""}
+          </table>
+          <div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:8px;">
+            <p style="margin:0 0 4px;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.5px;">Message</p>
+            <p style="margin:0;white-space:pre-wrap;">${message}</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"Sapta Home" <${process.env.SMTP_USER || "noreply@saptahome.com"}>`,
+      to: "support@sunsys.in",
+      replyTo: email,
+      subject: mailSubject,
+      html: htmlBody,
+    });
+
+    return res.json({ message: "Enquiry sent successfully" });
+  } catch (error) {
+    console.error("Email send failed:", error);
+    return res.status(500).json({ message: "Failed to send enquiry. Please try again." });
   }
 });
 
