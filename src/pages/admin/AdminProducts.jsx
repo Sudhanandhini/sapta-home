@@ -9,6 +9,10 @@ const emptyProduct = {
   description: "",
   price: 0,
   is_featured: false,
+  dimensions: "",
+  additional_info: "",
+  sizes_available: "",
+  sku: "",
   meta: "",
 };
 
@@ -61,7 +65,7 @@ const AdminProducts = () => {
   const filteredProducts = useMemo(() => {
     if (!search) return products;
     return products.filter((item) =>
-      [item.name, item.category, item.description].some((field) =>
+      [item.name, item.category, item.description, item.sku].some((field) =>
         (field || "").toLowerCase().includes(search.toLowerCase()),
       ),
     );
@@ -82,6 +86,10 @@ const AdminProducts = () => {
       description: item.description || "",
       price: Number(item.price || 0),
       is_featured: Boolean(item.is_featured),
+      dimensions: item.dimensions || "",
+      additional_info: item.additional_info || "",
+      sizes_available: item.sizes_available || "",
+      sku: item.sku || "",
       meta: item.meta ? JSON.stringify(item.meta, null, 2) : "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -152,29 +160,94 @@ const AdminProducts = () => {
     setMessage("Saved successfully");
   };
 
+  // const handleUpload = async (files) => {
+  //   if (!files || files.length === 0) return;
+  //   setUploading(true);
+  //   setMessage("");
+  //   const formData = new FormData();
+  //   Array.from(files).forEach((file) => formData.append("images", file));
+  //   const res = await fetch("/api/uploads", {
+  //     method: "POST",
+  //     credentials: "include",
+  //     body: formData,
+  //   });
+  //   const data = await res.json();
+  //   setUploading(false);
+  //   if (!res.ok) {
+  //     setMessage(data?.message || "Image upload failed");
+  //     return;
+  //   }
+  //   const urls = data?.urls || [];
+  //   if (urls.length > 0) {
+  //     setGallery((prev) => [...prev, ...urls]);
+  //     if (!form.image_url) {
+  //       setForm((prev) => ({ ...prev, image_url: urls[0] }));
+  //     }
+  //   }
+  // };
+
+
   const handleUpload = async (files) => {
     if (!files || files.length === 0) return;
+    
     setUploading(true);
     setMessage("");
-    const formData = new FormData();
-    Array.from(files).forEach((file) => formData.append("images", file));
-    const res = await fetch("/api/uploads", {
-      method: "POST",
-      credentials: "include",
-      body: formData,
+    
+    // Validate file sizes - max 500KB per file
+    const maxFileSize = 500 * 1024; // 500KB
+    const validFiles = [];
+    const invalidFiles = [];
+    
+    Array.from(files).forEach((file) => {
+      if (file.size > maxFileSize) {
+        invalidFiles.push(`${file.name} (${(file.size / 1024).toFixed(2)}KB - exceeds 500KB limit)`);
+      } else {
+        validFiles.push(file);
+      }
     });
-    const data = await res.json();
-    setUploading(false);
-    if (!res.ok) {
-      setMessage(data?.message || "Image upload failed");
+    
+    // Show error for files exceeding limit
+    if (invalidFiles.length > 0) {
+      setUploading(false);
+      setMessage(`❌ Files too large: ${invalidFiles.join(", ")}`);
       return;
     }
-    const urls = data?.urls || [];
-    if (urls.length > 0) {
-      setGallery((prev) => [...prev, ...urls]);
-      if (!form.image_url) {
-        setForm((prev) => ({ ...prev, image_url: urls[0] }));
+    
+    if (validFiles.length === 0) {
+      setUploading(false);
+      return;
+    }
+    
+    const formData = new FormData();
+    validFiles.forEach((file) => formData.append("images", file));
+    
+    try {
+      const res = await fetch("/api/uploads", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        setMessage(data?.message || "Image upload failed");
+        setUploading(false);
+        return;
       }
+      
+      const urls = data?.urls || [];
+      if (urls.length > 0) {
+        setGallery((prev) => [...prev, ...urls]);
+        if (!form.image_url) {
+          setForm((prev) => ({ ...prev, image_url: urls[0] }));
+        }
+        setMessage(`✅ Successfully uploaded ${urls.length} image(s)`);
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      setMessage("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -201,17 +274,19 @@ const AdminProducts = () => {
         </div>
       </div>
 
-      <main className="container mx-auto px-4 lg:px-8 py-10 grid gap-10 lg:grid-cols-[360px_1fr]">
+      <main className="container mx-auto px-4 lg:px-8 py-10 grid gap-10 lg:grid-cols-[400px_1fr]">
         <motion.form
           onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="rounded-3xl border border-border bg-card p-6 shadow-card space-y-4"
+          className="rounded-3xl border border-border bg-card p-6 shadow-card space-y-4 h-fit"
         >
           <h2 className="text-lg font-semibold text-primary">
             {editingId ? "Edit Product" : "Add New Product"}
           </h2>
+
+          {/* Basic Info */}
           <input
             type="text"
             placeholder="Product name"
@@ -228,6 +303,15 @@ const AdminProducts = () => {
             className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm"
             required
           />
+          {/* <input
+            type="text"
+            placeholder="SKU (e.g. AADT-4-4)"
+            value={form.sku}
+            onChange={(e) => handleChange("sku", e.target.value)}
+            className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm"
+          /> */}
+
+          {/* Images */}
           <div className="space-y-2">
             <label className="text-sm text-foreground/70">Main Image</label>
             {form.image_url ? (
@@ -245,8 +329,8 @@ const AdminProducts = () => {
               <p className="text-xs text-foreground/60">Main image will use the first uploaded image.</p>
             )}
           </div>
-          <div className="space-y-2">
-            <label className="text-sm text-foreground/70">Upload Images (max 6)</label>
+                   <div className="space-y-2">
+            <label className="text-sm text-foreground/70">Upload Images (max 6, 500KB each)</label>
             <input
               type="file"
               accept="image/*"
@@ -255,6 +339,11 @@ const AdminProducts = () => {
               className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm"
             />
             {uploading && <p className="text-xs text-foreground/60">Uploading...</p>}
+            {message && (
+              <p className={`text-xs ${message.includes('❌') ? 'text-red-500' : 'text-green-500'}`}>
+                {message}
+              </p>
+            )}
             {gallery.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {gallery.map((url) => (
@@ -272,27 +361,62 @@ const AdminProducts = () => {
               </div>
             )}
           </div>
+          {/* Price */}
+          <input
+            type="number"
+            placeholder="Price"
+            step="0.01"
+            value={form.price}
+            onChange={(e) => handleChange("price", e.target.value)}
+            className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm"
+          />
+
+          {/* Description */}
           <textarea
-            rows={4}
+            rows={3}
             placeholder="Description"
             value={form.description}
             onChange={(e) => handleChange("description", e.target.value)}
             className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm"
           />
-          <input
-            type="number"
-            placeholder="Price"
-            value={form.price}
-            onChange={(e) => handleChange("price", e.target.value)}
+
+          {/* Dimensions */}
+          <textarea
+            rows={2}
+            placeholder='Dimensions (e.g. 30" x 72", 36" x 72", 48" x 72")'
+            value={form.dimensions}
+            onChange={(e) => handleChange("dimensions", e.target.value)}
             className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm"
           />
+
+          {/* Sizes Available */}
           <textarea
-            rows={4}
-            placeholder='Meta JSON (e.g. {"size":"L","material":"Cotton"})'
+            rows={2}
+            placeholder="Sizes Available (comma-separated, e.g. S, M, L, XL)"
+            value={form.sizes_available}
+            onChange={(e) => handleChange("sizes_available", e.target.value)}
+            className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm"
+          />
+
+          {/* Additional Info */}
+          <textarea
+            rows={3}
+            placeholder="Additional Information (Design & Quality, Materials, Care Instructions, etc.)"
+            value={form.additional_info}
+            onChange={(e) => handleChange("additional_info", e.target.value)}
+            className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm"
+          />
+
+          {/* Meta JSON */}
+          <textarea
+            rows={3}
+            placeholder='Meta JSON (e.g. {"color":"Red","material":"Cotton"})'
             value={form.meta}
             onChange={(e) => handleChange("meta", e.target.value)}
-            className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm font-mono"
+            className="w-full rounded-xl border border-border bg-background px-4 py-2 text-sm font-mono text-xs"
           />
+
+          {/* Featured */}
           <label className="flex items-center gap-2 text-sm text-foreground/70">
             <input
               type="checkbox"
@@ -301,6 +425,8 @@ const AdminProducts = () => {
             />
             Featured product
           </label>
+
+          {/* Submit Button */}
           <button
             type="submit"
             className="w-full rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-navy-light"
@@ -342,7 +468,14 @@ const AdminProducts = () => {
                 <div className="mt-3">
                   <p className="text-xs uppercase tracking-widest text-foreground/60">{item.category}</p>
                   <h3 className="text-base font-semibold">{item.name}</h3>
+                  {item.sku && <p className="text-xs text-foreground/50">SKU: {item.sku}</p>}
                   <p className="text-sm text-foreground/70 line-clamp-2">{item.description}</p>
+                  {item.dimensions && (
+                    <p className="text-xs text-foreground/60 mt-1">Dimensions: {item.dimensions}</p>
+                  )}
+                  {item.sizes_available && (
+                    <p className="text-xs text-foreground/60">Sizes: {item.sizes_available}</p>
+                  )}
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-sm font-semibold text-primary">
                       ₹{Number(item.price || 0).toFixed(2)}

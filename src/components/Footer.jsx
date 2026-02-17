@@ -9,11 +9,11 @@ const Footer = () => {
         { name: "Contact", href: "contact" },
     ];
     const categories = [
-        { name: "Bedsheets", href: "#" },
-        { name: "Quilts", href: "#" },
-        { name: "Mattresses", href: "#" },
-        { name: "Pillows", href: "#" },
-        { name: "Bed Frames", href: "#" },
+        { name: "Bedsheets", href: "products" },
+        { name: "Quilts", href: "products" },
+        { name: "Mattresses", href: "products" },
+        { name: "Pillows", href: "products" },
+        { name: "Bed Frames", href: "products" },
     ];
     const socialLinks = [
         { icon: Facebook, href: "#", label: "Facebook" },

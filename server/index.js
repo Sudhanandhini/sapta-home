@@ -385,3 +385,167 @@ const port = process.env.PORT || 5176;
 app.listen(port, () => {
   console.log(`API server running on http://localhost:${port}`);
 });
+
+
+
+// Updated GET /api/products endpoint
+app.get("/api/products", async (req, res) => {
+  try {
+    const { category, featured, minPrice, maxPrice, search } = req.query;
+    const where = [];
+    const params = [];
+
+    if (category) {
+      where.push("category = ?");
+      params.push(category);
+    }
+    if (featured === "true") {
+      where.push("is_featured = 1");
+    }
+    if (minPrice) {
+      where.push("price >= ?");
+      params.push(Number(minPrice));
+    }
+    if (maxPrice) {
+      where.push("price <= ?");
+      params.push(Number(maxPrice));
+    }
+    if (search) {
+      where.push("(name LIKE ? OR description LIKE ? OR sku LIKE ?)");
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+    const [rows] = await getPool().query(
+      `SELECT id, name, category, image_url, description, price, is_featured, 
+              dimensions, sizes_available, additional_info, sku, meta
+       FROM products
+       ${whereClause}
+       ORDER BY id DESC`,
+      params,
+    );
+    res.json(rows.map(parseMetaFromDb));
+  } catch (error) {
+    console.error(error);
+    if (error?.code === "ER_BAD_FIELD_ERROR") {
+      return res.status(500).json({
+        message: "Database schema missing required columns.",
+        details: "Run the migration script to add new columns.",
+      });
+    }
+    res.status(500).json({ message: "Failed to fetch products" });
+  }
+});
+
+// Updated GET /api/products/:id endpoint
+app.get("/api/products/:id", async (req, res) => {
+  try {
+    const [rows] = await getPool().query(
+      `SELECT id, name, category, image_url, description, price, is_featured,
+              dimensions, sizes_available, additional_info, sku, meta
+       FROM products WHERE id = ?`,
+      [req.params.id],
+    );
+    if (!rows?.[0]) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    return res.json(parseMetaFromDb(rows[0]));
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to fetch product" });
+  }
+});
+
+// Updated POST /api/products endpoint
+app.post("/api/products", authMiddleware, async (req, res) => {
+  try {
+    const { name, category, image_url, description, price, is_featured, dimensions, sizes_available, additional_info, sku, meta } = req.body || {};
+
+    if (!name || !category) {
+      return res.status(400).json({ message: "Name and category are required" });
+    }
+
+    const [result] = await getPool().query(
+      `INSERT INTO products (name, category, image_url, description, price, is_featured, dimensions, sizes_available, additional_info, sku, meta)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name,
+        category,
+        image_url || null,
+        description || null,
+        Number(price) || 0,
+        is_featured ? 1 : 0,
+        dimensions || null,
+        sizes_available || null,
+        additional_info || null,
+        sku || null,
+        meta ? JSON.stringify(meta) : null,
+      ],
+    );
+
+    const product = {
+      id: result.insertId,
+      name,
+      category,
+      image_url: image_url || null,
+      description,
+      price: Number(price) || 0,
+      is_featured: Boolean(is_featured),
+      dimensions: dimensions || null,
+      sizes_available: sizes_available || null,
+      additional_info: additional_info || null,
+      sku: sku || null,
+      meta: meta || {},
+    };
+
+    return res.json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to create product" });
+  }
+});
+
+// Updated PUT /api/products/:id endpoint
+app.put("/api/products/:id", authMiddleware, async (req, res) => {
+  try {
+    const { name, category, image_url, description, price, is_featured, dimensions, sizes_available, additional_info, sku, meta } = req.body || {};
+
+    if (!name || !category) {
+      return res.status(400).json({ message: "Name and category are required" });
+    }
+
+    await getPool().query(
+      `UPDATE products 
+       SET name = ?, category = ?, image_url = ?, description = ?, 
+           price = ?, is_featured = ?, dimensions = ?, sizes_available = ?, 
+           additional_info = ?, sku = ?, meta = ?
+       WHERE id = ?`,
+      [
+        name,
+        category,
+        image_url || null,
+        description || null,
+        Number(price) || 0,
+        is_featured ? 1 : 0,
+        dimensions || null,
+        sizes_available || null,
+        additional_info || null,
+        sku || null,
+        meta ? JSON.stringify(meta) : null,
+        req.params.id,
+      ],
+    );
+
+    const [rows] = await getPool().query(
+      `SELECT id, name, category, image_url, description, price, is_featured,
+              dimensions, sizes_available, additional_info, sku, meta
+       FROM products WHERE id = ?`,
+      [req.params.id],
+    );
+
+    return res.json(parseMetaFromDb(rows[0]));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to update product" });
+  }
+});

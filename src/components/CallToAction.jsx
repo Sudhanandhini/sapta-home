@@ -52,13 +52,13 @@ const CallToAction = () => {
             Ready to Transform Your{" "}
             <span className="relative inline-block">
               <span className="bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">Home</span>
-              <motion.span
+              {/* <motion.span
                 className="absolute -bottom-1 left-0 right-0 h-2 bg-accent/30 rounded-full"
                 initial={{ scaleX: 0 }}
                 whileInView={{ scaleX: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-              />
+              /> */}
             </span>
             ?
           </h2>

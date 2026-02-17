@@ -1,95 +1,66 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, ShoppingCart, Star, ChevronLeft, ChevronRight, ArrowRight, X, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
-import productBedsheet from "@/assets/product-bedsheet.jpg";
-import productQuilt from "@/assets/product-quilt.jpg";
-import productMattress from "@/assets/product-mattress.jpg";
-import productPillow from "@/assets/product-pillow.jpg";
-import productBed from "@/assets/product-bed.jpg";
 
 const Products = () => {
-    const [currentSlide, setCurrentSlide] = useState(0);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [galleryIndex, setGalleryIndex] = useState(0);
+    const [isAutoPlay, setIsAutoPlay] = useState(true);
 
-    const products = [
-        {
-            id: 1,
-            name: "Premium Cotton Bedsheet Set",
-            price: 2499,
-            originalPrice: 3499,
-            rating: 4.8,
-            reviews: 128,
-            image: productBedsheet,
-            badge: "Best Seller",
-            category: "Bedsheet",
-        },
-        {
-            id: 2,
-            name: "Quilted Comfort Blanket",
-            price: 1899,
-            originalPrice: 2599,
-            rating: 4.7,
-            reviews: 95,
-            image: productQuilt,
-            badge: "New",
-            category: "Quilt",
-        },
-        {
-            id: 3,
-            name: "Memory Foam Mattress King",
-            price: 18999,
-            originalPrice: 24999,
-            rating: 4.9,
-            reviews: 256,
-            image: productMattress,
-            badge: "Popular",
-            category: "Mattress",
-        },
-        {
-            id: 4,
-            name: "Luxury Fluffy Pillow Set",
-            price: 999,
-            originalPrice: 1499,
-            rating: 4.6,
-            reviews: 74,
-            image: productPillow,
-            badge: null,
-            category: "Pillow",
-        },
-        {
-            id: 5,
-            name: "Modern Platform Bed Frame",
-            price: 32999,
-            originalPrice: 42999,
-            rating: 4.9,
-            reviews: 189,
-            image: productBed,
-            badge: "Premium",
-            category: "Bed",
-        },
-        {
-            id: 6,
-            name: "Floral Print Bedsheet",
-            price: 1799,
-            originalPrice: 2299,
-            rating: 4.5,
-            reviews: 67,
-            image: productBedsheet,
-            badge: null,
-            category: "Bedsheet",
-        },
-    ];
+    // Fetch products from API
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const res = await fetch("/api/products");
+                const data = await res.json();
+                setProducts(Array.isArray(data) ? data : []);
+            } catch (error) {
+                console.error("Failed to fetch products:", error);
+                setProducts([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducts();
+    }, []);
 
     const itemsPerSlide = 4;
-    const maxSlide = Math.ceil(products.length / itemsPerSlide) - 1;
-    const nextSlide = useCallback(() => setCurrentSlide((prev) => (prev >= maxSlide ? 0 : prev + 1)), [maxSlide]);
-    const prevSlide = () => setCurrentSlide((prev) => (prev <= 0 ? maxSlide : prev - 1));
 
-    // Auto-slide every 4 seconds
+    // Auto-slide one product at a time
     useEffect(() => {
-      const timer = setInterval(nextSlide, 4000);
-      return () => clearInterval(timer);
-    }, [nextSlide]);
+        if (!isAutoPlay || products.length === 0) return;
+        
+        const timer = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % products.length);
+        }, 3000);
+        
+        return () => clearInterval(timer);
+    }, [isAutoPlay, products.length]);
+
+    // Calculate visible products
+    const getVisibleProducts = () => {
+        const visible = [];
+        for (let i = 0; i < itemsPerSlide; i++) {
+            visible.push(products[(currentIndex + i) % products.length]);
+        }
+        return visible;
+    };
+
+    const nextSlide = () => {
+        setCurrentIndex((prev) => (prev + 1) % products.length);
+        setIsAutoPlay(false);
+        setTimeout(() => setIsAutoPlay(true), 5000);
+    };
+
+    const prevSlide = () => {
+        setCurrentIndex((prev) => (prev - 1 + products.length) % products.length);
+        setIsAutoPlay(false);
+        setTimeout(() => setIsAutoPlay(true), 5000);
+    };
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -104,212 +75,356 @@ const Products = () => {
         visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
     };
 
+    const handleQuickView = (product) => {
+        setSelectedProduct(product);
+        setGalleryIndex(0);
+    };
+
+    const getGalleryImages = (product) => {
+        const metaImages = Array.isArray(product?.meta?.images) ? product.meta.images : [];
+        return [product.image_url, ...metaImages].filter(Boolean);
+    };
+
     const ProductCard = ({ product }) => (
-      <motion.div variants={itemVariants} className="group">
-        <div className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-hover transition-all duration-500 border border-transparent hover:border-secondary/20">
-          {/* Image */}
-          <div className="relative aspect-square overflow-hidden bg-muted">
-            <motion.img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.4 }}
-            />
+        <motion.div variants={itemVariants} className="group">
+            <div className="bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-hover transition-all duration-500 border border-transparent hover:border-secondary/20">
+                {/* Image */}
+                <div className="relative aspect-square overflow-hidden bg-muted">
+                    <motion.img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.4 }}
+                    />
 
-            {/* Badge */}
-            {product.badge && (
-              <span
-                className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold ${
-                  product.badge === "Best Seller"
-                    ? "bg-accent text-accent-foreground"
-                    : product.badge === "New"
-                    ? "bg-secondary text-secondary-foreground"
-                    : product.badge === "Premium"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground"
-                }`}
-              >
-                {product.badge}
-              </span>
-            )}
+                    {/* Badge */}
+                    {product.is_featured && (
+                        <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-accent text-accent-foreground">
+                            Featured
+                        </span>
+                    )}
 
-            {/* Actions */}
-            {/* <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <motion.button
-                className="w-9 h-9 rounded-full bg-card shadow-md flex items-center justify-center text-muted-foreground hover:text-secondary hover:bg-secondary/10 transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Heart className="w-4 h-4" />
-              </motion.button>
-              <motion.button
-                className="w-9 h-9 rounded-full bg-secondary text-secondary-foreground shadow-md flex items-center justify-center hover:bg-secondary/90 transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ShoppingCart className="w-4 h-4" />
-              </motion.button>
-            </div> */}
+                    {/* Quick View */}
+                    <motion.div
+                        className="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        initial={{ y: 20 }}
+                        whileHover={{ y: 0 }}
+                    >
+                        <button
+                            onClick={() => handleQuickView(product)}
+                            className="w-full py-2.5 bg-card/90 backdrop-blur-sm rounded-full text-sm font-medium text-foreground hover:bg-card transition-colors"
+                        >
+                            Quick View
+                        </button>
+                    </motion.div>
+                </div>
 
-            {/* Quick View */}
-            <motion.div
-              className="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              initial={{ y: 20 }}
-              whileHover={{ y: 0 }}
-            >
-              {/* <button className="w-full py-2.5 bg-card/90 backdrop-blur-sm rounded-full text-sm font-medium text-foreground hover:bg-card transition-colors">
-                Quick View
-              </button> */}
-            </motion.div>
-          </div>
+                {/* Content */}
+                <div className="p-4">
+                    <span className="text-xs text-secondary font-medium uppercase tracking-wide">
+                        {product.category}
+                    </span>
+                    <h3 className="font-medium text-foreground mt-1 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        {product.name}
+                    </h3>
 
-          {/* Content */}
-          <div className="p-4">
-            <span className="text-xs text-secondary font-medium uppercase tracking-wide">
-              {product.category}
-            </span>
-            <h3 className="font-medium text-foreground mt-1 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-              {product.name}
-            </h3>
+                    {/* Price */}
+                    <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm font-semibold text-primary">
+                            ₹{Number(product.price || 0).toFixed(2)}
+                        </span>
+                    </div>
 
-            {/* Rating */}
-            <div className="flex items-center gap-1 mb-3">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3.5 h-3.5 ${
-                    i < Math.floor(product.rating)
-                      ? "text-accent fill-accent"
-                      : "text-muted"
-                  }`}
-                />
-              ))}
-              <span className="text-xs text-muted-foreground ml-1">
-                ({product.reviews})
-              </span>
+                    {/* Rating */}
+                    <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                            <Star
+                                key={i}
+                                className={`w-3.5 h-3.5 ${
+                                    i < Math.floor(4.5)
+                                        ? "text-accent fill-accent"
+                                        : "text-muted"
+                                }`}
+                            />
+                        ))}
+                        <span className="text-xs text-muted-foreground ml-1">(23)</span>
+                    </div>
+                </div>
             </div>
-
-            {/* <div className="text-sm font-semibold text-secondary">Request a quote</div> */}
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
     );
 
+    // Quick View Modal
+    const QuickViewModal = ({ product }) => {
+        const gallery = getGalleryImages(product);
+        const currentImage = gallery[galleryIndex] || product.image_url;
+
+        return (
+            <AnimatePresence>
+                {product && (
+                    <motion.div
+                        key="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setSelectedProduct(null)}
+                        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            key="modal-content"
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-card rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+                        >
+                            {/* Header */}
+                            <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-border bg-card/95 backdrop-blur-sm">
+                                <h2 className="text-xl font-semibold text-primary">Quick View</h2>
+                                <button
+                                    onClick={() => setSelectedProduct(null)}
+                                    className="p-2 hover:bg-muted rounded-full transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 space-y-6">
+                                {/* Gallery */}
+                                <div className="space-y-4">
+                                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted">
+                                        <motion.img
+                                            key={currentImage}
+                                            src={currentImage}
+                                            alt={product.name}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+
+                                    {/* Thumbnail Gallery */}
+                                    {gallery.length > 1 && (
+                                        <div className="flex gap-2 overflow-x-auto">
+                                            {gallery.map((image, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => setGalleryIndex(idx)}
+                                                    className={`w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden border-2 transition-all ${
+                                                        galleryIndex === idx
+                                                            ? "border-primary"
+                                                            : "border-border hover:border-secondary"
+                                                    }`}
+                                                >
+                                                    <img
+                                                        src={image}
+                                                        alt=""
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Product Details */}
+                                <div className="space-y-4">
+                                    <div>
+                                        <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                                            {product.category}
+                                        </span>
+                                        <h1 className="text-2xl font-bold text-primary mt-2">
+                                            {product.name}
+                                        </h1>
+                                    </div>
+
+                                    {/* Price */}
+                                    <div>
+                                        <span className="text-3xl font-bold text-primary">
+                                            ₹{Number(product.price || 0).toFixed(2)}
+                                        </span>
+                                    </div>
+
+                                    {/* Rating */}
+                                    <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star
+                                                key={i}
+                                                className="w-4 h-4 text-accent fill-accent"
+                                            />
+                                        ))}
+                                        <span className="text-sm text-foreground/60 ml-2">(4.5 • 23 reviews)</span>
+                                    </div>
+
+                                    {/* SKU */}
+                                    {product.sku && (
+                                        <div className="text-sm">
+                                            <span className="text-foreground/60">SKU: </span>
+                                            <span className="font-medium">{product.sku}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Description */}
+                                    {product.description && (
+                                        <div>
+                                            <h3 className="font-semibold text-primary mb-2">Description</h3>
+                                            <p className="text-sm text-foreground/80">
+                                                {product.description}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Sizes Available */}
+                                    {product.sizes_available && (
+                                        <div>
+                                            <h3 className="font-semibold text-primary mb-2">Sizes Available</h3>
+                                            <p className="text-sm text-foreground/80">
+                                                {product.sizes_available}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Dimensions */}
+                                    {product.dimensions && (
+                                        <div>
+                                            <h3 className="font-semibold text-primary mb-2">Dimensions</h3>
+                                            <p className="text-sm text-foreground/80">
+                                                {product.dimensions}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Additional Info */}
+                                    {product.additional_info && (
+                                        <div>
+                                            <h3 className="font-semibold text-primary mb-2">Additional Information</h3>
+                                            <p className="text-sm text-foreground/80 whitespace-pre-line">
+                                                {product.additional_info}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* CTA Buttons */}
+                                    <div className="flex gap-3 pt-4">
+                                        <Link
+                                            to={`/products/${product.id}`}
+                                            className="flex-1 py-3 bg-primary text-primary-foreground rounded-full font-semibold hover:bg-primary/90 transition-colors text-center"
+                                        >
+                                            View Full Details
+                                        </Link>
+                                        <button className="px-6 py-3 border border-border rounded-full hover:bg-muted transition-colors">
+                                            <Heart className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        );
+    };
+
+    const visibleProducts = getVisibleProducts();
+
     return (
-      <section id="products" className="py-20 lg:py-28 bg-muted/50 relative overflow-hidden">
-        {/* Decorative background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-secondary/5 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
-        </div>
+        <>
+            <section id="products" className="py-20 lg:py-28 bg-muted/50 relative overflow-hidden">
+                {/* Decorative background */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-secondary/5 blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
+                </div>
 
-        <div className="container mx-auto px-4 lg:px-8 relative">
-          {/* New Arrivals */}
-          <div className="mb-20">
-            <motion.div
-              className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <div>
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-secondary/15 text-secondary rounded-full text-sm font-medium mb-4 border border-secondary/30">
-                  <Star className="w-3.5 h-3.5 fill-secondary" />
-                  New Arrivals
-                </span>
-                <h2 className="font-display text-3xl lg:text-4xl font-bold text-primary">
-                  Discover Fresh Styles
-                </h2>
-              </div>
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 text-secondary font-medium hover:text-secondary/80 transition-colors group"
-              >
-                View All Products
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </motion.div>
+                <div className="container mx-auto px-4 lg:px-8 relative">
+                    {/* Featured Products */}
+                    <div>
+                        <motion.div
+                            className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                        >
+                            <div>
+                                <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/15 text-accent-foreground rounded-full text-sm font-medium mb-4 border border-accent/30">
+                                    <Star className="w-3.5 h-3.5 fill-accent text-accent" />
+                                    Featured Products
+                                </span>
+                                <h2 className="font-display text-3xl lg:text-4xl font-bold text-primary">
+                                    Customer Favorites
+                                </h2>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={prevSlide}
+                                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-secondary hover:text-secondary-foreground hover:border-secondary transition-all"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                                <button
+                                    onClick={nextSlide}
+                                    className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all"
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </motion.div>
 
-            <motion.div
-              className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {products.slice(0, 4).map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </motion.div>
-          </div>
+                        {loading ? (
+                            <div className="flex items-center justify-center h-96">
+                                <div className="relative">
+                                    <div className="h-16 w-16 rounded-full border-4 border-pink-200 border-t-pink-500 animate-spin" />
+                                </div>
+                            </div>
+                        ) : products.length === 0 ? (
+                            <div className="text-center py-12">
+                                <p className="text-foreground/60">No products found</p>
+                            </div>
+                        ) : (
+                            <>
+                                <motion.div
+                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    key={currentIndex}
+                                >
+                                    {visibleProducts.map((product) => (
+                                        <ProductCard key={product.id} product={product} />
+                                    ))}
+                                </motion.div>
 
-          {/* Featured Products Carousel */}
-          <div>
-            <motion.div
-              className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <div>
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/15 text-accent-foreground rounded-full text-sm font-medium mb-4 border border-accent/30">
-                  <Star className="w-3.5 h-3.5 fill-accent text-accent" />
-                  Featured Products
-                </span>
-                <h2 className="font-display text-3xl lg:text-4xl font-bold text-primary">
-                  Customer Favorites
-                </h2>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={prevSlide}
-                  disabled={currentSlide === 0}
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-secondary hover:text-secondary-foreground hover:border-secondary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  disabled={currentSlide === maxSlide}
-                  className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </motion.div>
+                                {/* Slide indicator dots */}
+                               <div className="flex justify-center gap-2 mt-8">
+  {products.slice(0, 3).map((_, i) => (
+    <button
+      key={i}
+      onClick={() => {
+        setCurrentIndex(i);
+        setIsAutoPlay(false);
+        setTimeout(() => setIsAutoPlay(true), 5000);
+      }}
+      className={`h-2 rounded-full transition-all duration-300 ${
+        i === currentIndex
+          ? "w-8 bg-secondary"
+          : "w-2 bg-secondary/20 hover:bg-secondary/40"
+      }`}
+    />
+  ))}
+</div>
 
-            <div className="overflow-hidden -mx-3">
-              <motion.div
-                className="flex"
-                animate={{ x: `-${currentSlide * 100}%` }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-              >
-                {products.map((product) => (
-                  <div key={product.id} className="w-full sm:w-1/2 lg:w-1/4 flex-shrink-0 px-3">
-                    <ProductCard product={product} />
-                  </div>
-                ))}
-              </motion.div>
-            </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </section>
 
-            {/* Slide indicators */}
-            <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: maxSlide + 1 }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentSlide(i)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    currentSlide === i
-                      ? "w-8 bg-secondary"
-                      : "w-2 bg-secondary/20 hover:bg-secondary/40"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+            {/* Quick View Modal */}
+            {selectedProduct && <QuickViewModal product={selectedProduct} />}
+        </>
     );
 };
 
