@@ -73,7 +73,7 @@ const Testimonials = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-secondary/20 text-secondary rounded-full text-sm font-medium mb-6 border border-secondary/30">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/20 text-accent rounded-full text-sm font-medium mb-6 border border-accent/30">
                 <Star className="w-3.5 h-3.5 fill-secondary" />
                 Testimonials
               </span>

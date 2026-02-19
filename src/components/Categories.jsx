@@ -169,7 +169,7 @@ const Categories = () => {
             custom={1}
             className="mt-4 font-display text-3xl lg:text-5xl font-bold text-primary"
           >
-            What Makes Us <span className="text-secondary">Diff</span><span className="text-accent">erent</span>
+            What Makes Us <span className="bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">Different</span>
           </motion.h2>
           <motion.p
             variants={fadeUp}

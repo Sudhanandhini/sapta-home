@@ -390,7 +390,6 @@ const Products = () => {
                                     variants={containerVariants}
                                     initial="hidden"
                                     animate="visible"
-                                    key={currentIndex}
                                 >
                                     {visibleProducts.map((product) => (
                                         <ProductCard key={product.id} product={product} />
