@@ -1,0 +1,10 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /sapta_home/
+
+  # Don't rewrite real files (js, css, images, etc.)
+  RewriteCond %{REQUEST_FILENAME} !-f
+
+  # Rewrite everything else (including paths that match a directory name) to index.html
+  RewriteRule . /sapta_home/index.html [L]
+</IfModule>
