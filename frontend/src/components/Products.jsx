@@ -131,11 +131,11 @@ const Products = () => {
                     </h3>
 
                     {/* Price */}
-                    <div className="flex items-center gap-2 mb-3">
+                    {/* <div className="flex items-center gap-2 mb-3">
                         <span className="text-sm font-semibold text-primary">
                             ₹{Number(product.price || 0).toFixed(2)}
                         </span>
-                    </div>
+                    </div> */}
 
                     {/* Rating */}
                     <div className="flex items-center gap-1">
@@ -243,11 +243,11 @@ const Products = () => {
                                     </div>
 
                                     {/* Price */}
-                                    <div>
+                                    {/* <div>
                                         <span className="text-3xl font-bold text-primary">
                                             ₹{Number(product.price || 0).toFixed(2)}
                                         </span>
-                                    </div>
+                                    </div> */}
 
                                     {/* Rating */}
                                     <div className="flex items-center gap-1">

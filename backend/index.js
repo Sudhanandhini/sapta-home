@@ -8,7 +8,7 @@ import crypto from "crypto";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import axios from "axios";
+import nodemailer from "nodemailer";
 
 const app = express();
 
@@ -400,65 +400,48 @@ app.delete("/api/products/:id", authMiddleware, requireAdmin, async (req, res) =
 // });
 
 
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
 app.post("/api/enquiry", async (req, res) => {
   try {
-    const { name, email, phone, subject, message } = req.body || {};
+    const { name, email, phone, place, message } = req.body || {};
 
     if (!name || !email || !message) {
       return res.status(400).json({ message: "Name, email and message required" });
     }
 
-    const htmlContent = `
-      <div style="font-family:Arial,sans-serif;">
-        <h2>New Contact Enquiry</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone || "N/A"}</p>
-        <p><strong>Subject:</strong> ${subject || "General Enquiry"}</p>
-        <hr/>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
-      </div>
-    `;
-
-    await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
-      {
-        sender: {
-          name: "Sapta Home",
-          email: "support@sunsys.in",
-        },
-        to: [
-          {
-            email: "sudhanandhini@sunsys.in",
-            name: "Support Team",
-          },
-        ],
-        replyTo: {
-          email: email,
-          name: name,
-        },
-        subject: `New Enquiry from ${name}`,
-        htmlContent: htmlContent,
-      },
-      {
-       headers: {
-  "api-key": process.env.BREVO_API_KEY,
-  "Content-Type": "application/json",
-}
-      }
-    );
+    await transporter.sendMail({
+      from: `"Sapta Home" <${process.env.SMTP_USER}>`,
+      to: "support@sunsys.in",
+      replyTo: email,
+      subject: `New Enquiry from ${name}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;">
+          <h2 style="color:#ec4899;">New Contact Enquiry</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone:</strong> ${phone || "N/A"}</p>
+          <p><strong>Place:</strong> ${place || "N/A"}</p>
+          <hr/>
+          <p><strong>Message:</strong></p>
+          <p>${message}</p>
+        </div>
+      `,
+    });
 
     return res.json({ message: "Enquiry sent successfully" });
-
   } catch (error) {
-  console.error("Brevo Error Full:", error.response?.data || error);
-  return res.status(500).json({
-    message: "Failed to send enquiry",
-    error: error.response?.data || error.message
-  });
-}
-
+    console.error("Email send error:", error);
+    return res.status(500).json({ message: "Failed to send enquiry", error: error.message });
+  }
 });
 
 
